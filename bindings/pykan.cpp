@@ -1,6 +1,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include "../kan.hpp"  // Pfad zur Header-Datei anpassen
+#include "../src/kan.hpp"  // Pfad zur Header-Datei anpassen
 
 namespace py = pybind11;
 
