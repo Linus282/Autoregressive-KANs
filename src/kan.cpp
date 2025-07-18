@@ -3,27 +3,15 @@
 
 KAN::KAN(int input_dim, int hidden_units, const std::vector<double>& knots, BasisType basis)
     : input_dim_(input_dim), hidden_units_(hidden_units), basis_(basis) {
-    
     weights_.resize(hidden_units_, std::vector<double>(input_dim_, 0.0));
-    coeffs_.resize(hidden_units_, std::vector<double>(knots.size(), 0.0));
-    
+    splines_.resize(hidden_units_);
     for (int i = 0; i < hidden_units_; ++i) {
-        splines_.emplace_back(knots);
-    }
-}
-
-void KAN::setWeights(int neuron, const std::vector<double>& weights, const std::vector<double>& coeffs) {
-    weights_[neuron] = weights;
-    coeffs_[neuron] = coeffs;
-
-    if (basis_ == BasisType::LinearSpline) {
-        splines_[neuron].setCoefficients(coeffs);
+        splines_[i].setKnots(knots);
     }
 }
 
 double KAN::forward(const std::vector<double>& x) {
-    double output = 0.0;
-
+    double out = 0.0;
     for (int i = 0; i < hidden_units_; ++i) {
         double z = 0.0;
         for (int j = 0; j < input_dim_; ++j) {
@@ -36,15 +24,33 @@ double KAN::forward(const std::vector<double>& x) {
                 activation = splines_[i].evaluate(z);
                 break;
             case BasisType::Sin:
-                activation = std::sin(z);
+                activation = sin(z);
                 break;
             case BasisType::Tanh:
-                activation = std::tanh(z);
+                activation = tanh(z);
                 break;
         }
 
-        output += activation;
+        out += activation;
     }
+    return out;
+}
 
-    return output;
+void KAN::setWeights(int neuron, const std::vector<double>& w, const std::vector<double>& coeffs) {
+    if (neuron >= 0 && neuron < hidden_units_) {
+        weights_[neuron] = w;
+        splines_[neuron].setCoefficients(coeffs);
+    }
+}
+
+int KAN::numNeurons() const {
+    return hidden_units_;
+}
+
+std::vector<double> KAN::getNeuronWeights(int i) const {
+    return weights_[i];
+}
+
+std::vector<double> KAN::getNeuronCoeffs(int i) const {
+    return splines_[i].getCoefficients();
 }
