@@ -13,7 +13,11 @@ void KAN::setWeights(int neuron, const std::vector<double>& w, const std::vector
 }
 
 double KAN::forward(const std::vector<double>& x) {
-    double out = 0.0;
+    double activation = splines_[i].evaluate(z);
+    if (basis_ == BasisType::Sin) activation = std::sin(z);
+    else if (basis_ == BasisType::Tanh) activation = std::tanh(z);
+        out += activation;
+
     for (int i = 0; i < hidden_units_; ++i) {
         double z = 0.0;
         for (int j = 0; j < input_dim_; ++j)
